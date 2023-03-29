@@ -87,7 +87,7 @@ app.post('/villains', (req: Request, res: Response) => {
 
 })
 
-app.put('/heroes', (req: Request, res: Response) =>{
+app.put('/heroes/:id', (req: Request, res: Response) =>{
     const {name , alter} = req.body;
     const lookupchar = heroes.find((Character) => Character.alter.toLowerCase() === alter.toLowerCase())
 
@@ -102,7 +102,7 @@ app.put('/heroes', (req: Request, res: Response) =>{
 
 })
 
-app.put('/villains', (req: Request, res: Response) =>{
+app.put('/villains/:id', (req: Request, res: Response) =>{
     const {name , alter} = req.body;
     const lookupchar = villains.find((Character) => Character.alter.toLowerCase() === alter.toLowerCase())
 
@@ -124,7 +124,7 @@ app.delete('/heroes/:id', (req: Request, res: Response) => {
     if (index < 0) {
         return res.status(404).json(`${alter} has not been found`)
     }
-    
+
     heroes.splice(index,1)
     res.status(200).json(`${alter} has been deleted from the database`)
 })
