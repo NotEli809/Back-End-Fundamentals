@@ -124,7 +124,7 @@ app.delete('/heroes/:id', (req: Request, res: Response) => {
     if (index < 0) {
         return res.status(404).json(`${alter} has not been found`)
     }
-
+    
     heroes.splice(index,1)
     res.status(200).json(`${alter} has been deleted from the database`)
 })
