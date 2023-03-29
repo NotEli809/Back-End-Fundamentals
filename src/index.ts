@@ -42,10 +42,10 @@ app.get('/villains/:name', (req: Request, res: Response) => {
 })
 
 app.post('/heroes', (req: Request, res: Response) => {
-    const { alter, name } = req.body
+    const { name, alter } = req.body
     const lookupchar = heroes.find((Character)=>Character.alter.toLowerCase() === alter.toLowerCase());
 
-    if(lookupchar){
+    if(!lookupchar){
         return res.status(400).json(
             {
                 message: `${alter} already exists.`
@@ -57,6 +57,7 @@ app.post('/heroes', (req: Request, res: Response) => {
         name,
         alter
     };
+
     _id += 1
     heroes.push(newCharacter);
     res.status(201).json(newCharacter)
@@ -79,7 +80,6 @@ app.post('/villains', (req: Request, res: Response) => {
         name,
         alter
     };
-
     _id += 1
     
     villains.push(newCharacter);
@@ -117,7 +117,7 @@ app.put('/villains', (req: Request, res: Response) =>{
 
 })
 
-app.delete('/heroes/:alter', (req: Request, res: Response) => {
+app.delete('/heroes/:id', (req: Request, res: Response) => {
     const { alter } = req.params;
     const index = heroes.findIndex((Character)=> Character.alter.toLowerCase()===alter.toLowerCase())
 
@@ -129,7 +129,7 @@ app.delete('/heroes/:alter', (req: Request, res: Response) => {
     res.status(200).json(`${alter} has been deleted from the database`)
 })
 
-app.delete('/villains/:alter', (req: Request, res: Response) => {
+app.delete('/villains/:id', (req: Request, res: Response) => {
     const { alter } = req.params;
     const index = villains.findIndex((Character)=> Character.alter.toLowerCase()===alter.toLowerCase())
 
