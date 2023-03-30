@@ -1,5 +1,6 @@
 import express from 'express';
 import { Request, Response } from 'express';
+import { json } from 'stream/consumers';
 
 const app = express();
 
@@ -9,17 +10,15 @@ interface Characters{
     alter: String
 }
 
-let _id = 0
+app.use(express.json());
 
-const heroes:Characters[] = [
-    {
-        id: 1,
-        name: "Bruh",
-        alter: "The Bruh Moment"
-    }
-]
+const heroes:Characters[] = []
+
+let heroes_id = heroes.length + 1;
 
 const villains:Characters[] = []
+
+let villains_id = villains.length + 1;
 
 app.get('/heroes', (req: Request, res: Response) => {
     res.json(heroes);
@@ -32,20 +31,20 @@ app.get('/villains', (req: Request, res: Response) => {
 app.get('/heroes/:name', (req: Request, res: Response) => {
     const name = req.params.name;
     const char = heroes.find((Character) => Character.name.toLowerCase() === name.toLowerCase())
-   !char ? res.send("Hero Not Found") : res.json(char)
+   !char ? res.send("Hero Not Found, Try Searching for a Hero using their Hero name") : res.json(char)
 })
 
 app.get('/villains/:name', (req: Request, res: Response) => {
     const name = req.params.name;
     const char = villains.find((Character) => Character.name.toLowerCase() === name.toLowerCase())
-   !char ? res.send("Villain Not Found") : res.json(char)
+   !char ? res.send("Villain Not Found Try Searching for a Villain using their Villain name") : res.json(char)
 })
 
 app.post('/heroes', (req: Request, res: Response) => {
     const { name, alter } = req.body
     const lookupchar = heroes.find((Character)=>Character.alter.toLowerCase() === alter.toLowerCase());
 
-    if(!lookupchar){
+    if(lookupchar){
         return res.status(400).json(
             {
                 message: `${alter} already exists.`
@@ -53,12 +52,12 @@ app.post('/heroes', (req: Request, res: Response) => {
         )
     }
     const newCharacter = {
-        id: _id,
+        id: heroes_id,
         name,
         alter
     };
 
-    _id += 1
+    heroes_id += 1
     heroes.push(newCharacter);
     res.status(201).json(newCharacter)
 
@@ -76,69 +75,74 @@ app.post('/villains', (req: Request, res: Response) => {
     }
 
     const newCharacter = {
-        id: _id,
+        id: villains_id,
         name,
         alter
     };
-    _id += 1
-    
+
+    villains_id += 1
+
     villains.push(newCharacter);
     res.status(201).json(newCharacter)
 
 })
 
 app.put('/heroes/:id', (req: Request, res: Response) =>{
+    const {id} = req.params;
     const {name , alter} = req.body;
-    const lookupchar = heroes.find((Character) => Character.alter.toLowerCase() === alter.toLowerCase())
+    const index = heroes.findIndex((Character) => Character.id === parseInt(id));
 
-    if (!lookupchar) {
-        return res.status(401).json({
-            message: `${alter} does not exist`
-        })
+    if (index < 0) {
+        return res.status(404).json(`The hero with ID ${id} was not found.`);
     }
 
-    lookupchar.alter = alter !== undefined ? alter : lookupchar.alter;
-    lookupchar.name = name !== undefined ? name : lookupchar.name;
+    const hero = heroes[index];
 
+    hero.alter = alter;
+    hero.name = name;
+
+    res.status(200).json(hero);
 })
 
 app.put('/villains/:id', (req: Request, res: Response) =>{
+    const {id} = req.params;
     const {name , alter} = req.body;
-    const lookupchar = villains.find((Character) => Character.alter.toLowerCase() === alter.toLowerCase())
+    const index = villains.findIndex((villain) => villain.id === parseInt(id));
 
-    if (!lookupchar) {
-        return res.status(401).json({
-            message: `${alter} does not exist`
-        })
+    if (index < 0) {
+        return res.status(404).json(`The villain with ID ${id} was not found.`);
     }
 
-    lookupchar.alter = alter !== undefined ? alter : lookupchar.alter;
-    lookupchar.name = name !== undefined ? name : lookupchar.name;
+    const villain = villains[index];
 
+    villain.alter = alter;
+    villain.name = name;
+
+    res.status(200).json(villain);
 })
 
 app.delete('/heroes/:id', (req: Request, res: Response) => {
-    const { alter } = req.params;
-    const index = heroes.findIndex((Character)=> Character.alter.toLowerCase()===alter.toLowerCase())
+    const { id, alter } = req.params;
+    const index = heroes.findIndex((Character)=> Character.id === parseInt(id))
 
     if (index < 0) {
-        return res.status(404).json(`${alter} has not been found`)
+        return res.status(404).json(`The alter ${alter} has not been found`);
     }
 
-    heroes.splice(index,1)
-    res.status(200).json(`${alter} has been deleted from the database`)
+    const deletedCharacter = heroes.splice(index,1)[0];
+    res.status(200).json(`${deletedCharacter.alter} (${deletedCharacter.id}) has been deleted from the database.`);
 })
 
 app.delete('/villains/:id', (req: Request, res: Response) => {
-    const { alter } = req.params;
-    const index = villains.findIndex((Character)=> Character.alter.toLowerCase()===alter.toLowerCase())
+    const { id, alter } = req.params;
+    const index = villains.findIndex((Character)=> Character.id === parseInt(id))
 
     if (index < 0) {
-        return res.status(404).json(`The alter ${alter} has not been found`)
+        return res.status(404).json(`The alter ${alter} has not been found`);
     }
 
-    villains.splice(index,1)
-    res.status(200).json(`${alter} has been deleted from the database`)
+    const deletedCharacter = villains.splice(index,1)[0];
+    res.status(200).json(`${deletedCharacter.alter} (${deletedCharacter.id}) has been deleted from the database.`);
 })
 
 
